@@ -29,6 +29,7 @@ impl FromStr for Command {
 struct Position {
     x: u32,
     y: u32,
+    aim: u32,
 }
 
 fn main() -> Result<()> {
@@ -39,7 +40,14 @@ fn main() -> Result<()> {
         .map(|line| line.parse::<Command>())
         .collect::<Result<_>>()?;
 
-    let mut position = Position { x: 0, y: 0 };
+    part1(&commands);
+    part2(&commands);
+
+    Ok(())
+}
+
+fn part1(commands: &[Command]) {
+    let mut position = Position { x: 0, y: 0, aim: 0 };
 
     for command in commands {
         match command {
@@ -56,6 +64,25 @@ fn main() -> Result<()> {
     }
 
     println!("Part 1: {}", position.x * position.y);
+}
 
-    Ok(())
+fn part2(commands: &[Command]) {
+    let mut position = Position { x: 0, y: 0, aim: 0 };
+
+    for command in commands {
+        match command {
+            Command::Forward(v) => {
+                position.x += v;
+                position.y += position.aim * v;
+            }
+            Command::Up(v) => {
+                position.aim -= v;
+            }
+            Command::Down(v) => {
+                position.aim += v;
+            }
+        }
+    }
+
+    println!("Part 2: {}", position.x * position.y);
 }
