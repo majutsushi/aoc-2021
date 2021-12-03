@@ -26,6 +26,7 @@ impl FromStr for Command {
     }
 }
 
+#[derive(Default)]
 struct Position {
     x: u32,
     y: u32,
@@ -37,7 +38,7 @@ fn main() -> Result<()> {
 
     let commands: Vec<Command> = input
         .lines()
-        .map(|line| line.parse::<Command>())
+        .map(str::parse::<Command>)
         .collect::<Result<_>>()?;
 
     part1(&commands);
@@ -47,7 +48,7 @@ fn main() -> Result<()> {
 }
 
 fn part1(commands: &[Command]) {
-    let mut position = Position { x: 0, y: 0, aim: 0 };
+    let mut position = Position::default();
 
     for command in commands {
         match command {
@@ -67,7 +68,7 @@ fn part1(commands: &[Command]) {
 }
 
 fn part2(commands: &[Command]) {
-    let mut position = Position { x: 0, y: 0, aim: 0 };
+    let mut position = Position::default();
 
     for command in commands {
         match command {

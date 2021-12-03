@@ -12,20 +12,16 @@ fn main() -> Result<()> {
         })
         .collect::<Result<_>>()?;
 
-    let increases_part1: u64 = values
-        .iter()
-        .tuple_windows()
-        .map(|(a, b)| if b > a { 1 } else { 0 })
-        .sum();
+    let increases_part1: usize = values.iter().tuple_windows().filter(|(a, b)| b > a).count();
 
     println!("Part 1: {}", increases_part1);
 
-    let increases_part2: u64 = values
+    let increases_part2: usize = values
         .iter()
         .tuple_windows()
         .map(|(a, b, c, d)| (a + b + c, b + c + d))
-        .map(|(a, b)| if b > a { 1 } else { 0 })
-        .sum();
+        .filter(|(a, b)| b > a)
+        .count();
 
     println!("Part 2: {}", increases_part2);
 
