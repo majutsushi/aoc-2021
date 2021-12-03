@@ -6,64 +6,59 @@ use itertools::Itertools;
 fn main() -> Result<()> {
     let input = aoc_2021::read_input("03")?;
 
-    let ones = count_ones(&input);
-    let gamma = ones
+    let num_len = input[0].len();
+    let numbers: Vec<u32> = input
         .iter()
-        .map(|&count| {
-            if count as usize >= input.len() / 2 {
-                1
-            } else {
-                0
-            }
-        })
-        .join("");
-    let gamma = u32::from_str_radix(&gamma, 2)?;
-    let epsilon = !gamma & (2u32.pow(ones.len() as u32) - 1);
+        .map(|s| u32::from_str_radix(s, 2).unwrap())
+        .collect_vec();
 
-    println!("Part 1: {:?}", gamma * epsilon);
+    let mut gamma = 0u32;
+    for i in 0..num_len {
+        let mask = 2u32.pow(i as u32);
+        let num_ones = count_ones(&numbers, mask);
+        if num_ones >= input.len() / 2 {
+            gamma += mask;
+        }
+    }
 
-    let oxygen = u32::from_str_radix(&filter_list(input.clone(), 1), 2)?;
-    let co2 = u32::from_str_radix(&filter_list(input, 0), 2)?;
+    let epsilon = !gamma & (2u32.pow(num_len as u32) - 1);
+
+    println!("Part 1: {}", gamma * epsilon);
+
+    let oxygen = filter_numbers(&numbers, num_len, 1);
+    let co2 = filter_numbers(&numbers, num_len, 0);
     println!("Part 2: {}", oxygen * co2);
 
     Ok(())
 }
 
-fn count_ones(numbers: &[String]) -> Vec<u32> {
-    numbers
-        .iter()
-        .map(|line| line.chars().map(|c| c.to_digit(2).unwrap()).collect())
-        .reduce(|accum: Vec<u32>, item| {
-            accum
-                .iter()
-                .zip(item.iter())
-                .map(|(a, b)| a + b)
-                .collect::<Vec<u32>>()
-        })
-        .unwrap()
+fn count_ones(numbers: &[u32], mask: u32) -> usize {
+    numbers.iter().filter(|&&num| num & mask != 0).count()
 }
 
-fn filter_list(mut list: Vec<String>, preferred: u32) -> String {
-    for i in 0.. {
-        let num_ones = count_ones(&list)[i];
-        let to_keep = match num_ones.cmp(&(list.len() as u32 - num_ones)) {
+fn filter_numbers(numbers: &[u32], num_len: usize, preferred: u32) -> u32 {
+    let mut numbers = numbers.to_owned();
+    for i in (0..num_len).rev() {
+        let mask = 2u32.pow(i as u32);
+        let num_ones = count_ones(&numbers, mask);
+        let to_keep = match num_ones.cmp(&(numbers.len() - num_ones)) {
             Ordering::Less => {
                 if preferred == 1 {
-                    '0'
+                    0
                 } else {
-                    '1'
+                    1
                 }
             }
-            Ordering::Equal => preferred.to_string().chars().next().unwrap(),
-            Ordering::Greater => preferred.to_string().chars().next().unwrap(),
+            Ordering::Equal => preferred,
+            Ordering::Greater => preferred,
         };
-        list = list
+        numbers = numbers
             .into_iter()
-            .filter(|item| item.chars().nth(i).unwrap() == to_keep)
+            .filter(|&num| num & mask == to_keep << i)
             .collect();
-        if list.len() == 1 {
+        if numbers.len() == 1 {
             break;
         }
     }
-    list[0].clone()
+    numbers[0]
 }
